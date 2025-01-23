@@ -35,7 +35,7 @@ void Network::forwardPass(std::vector<double> inputs) {
 }
 
 void Network::backwardPass(std::vector<double> targets) {
-	layers.back().backwardPassOutputLayer(targets);
+	layers.back().backwardPassOutputLayer(targets, mseDerivative);
 	for (int i = layers.size() - 2; i >= 0; i--) {
 		layers[i].backwardPassHiddenLayer(layers[i + 1]);
 	}
@@ -55,6 +55,15 @@ void Network::train(int epochs, double learningRate, std::vector<std::vector<dou
 			updateWeights(learningRate);
 		}
 	}
+}
+
+// Not really much of a "mean" since there's only one error being calculated
+double Network::mse(double target, double output) {
+	return pow(output - target, 2);
+}
+
+double Network::mseDerivative(double target, double output) {
+	return 2 * (output - target);
 }
 
 void Network::print() {

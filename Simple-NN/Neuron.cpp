@@ -24,8 +24,8 @@ void Neuron::forwardPass(const Layer &prevLayer) {
 	output = sigmoid(val);
 }
 
-void Neuron::backwardPassOutputLayer(double target) {
-	double error = target - output;
+void Neuron::backwardPassOutputLayer(double target, double (*lossDerivative)(double target, double output)) {
+	double error = lossDerivative(target, output);
 	delta = error * sigmoidDerivative(val);
 }
 
@@ -42,7 +42,7 @@ void Neuron::backwardPassHiddenLayer(const Layer &nextLayer) {
 void Neuron::updateWeights(double learningRate, Layer &prevLayer) {
 	// Update our incoming connections
 	for (int i = 0; i < prevLayer.neurons.size(); i++) {
-		prevLayer.neurons[i].weights[index] += learningRate * delta * prevLayer.neurons[i].output;
+		prevLayer.neurons[i].weights[index] -= learningRate * delta * prevLayer.neurons[i].output;
 	}
 }
 

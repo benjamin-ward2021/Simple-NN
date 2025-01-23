@@ -6,7 +6,7 @@ class Layer {
 public:
 	Layer(int index, int numNeurons, int numNeuronsNextLayer);
 	void forwardPass(const Layer &prevLayer);
-	void backwardPassOutputLayer(const std::vector<double> &targets);
+	void backwardPassOutputLayer(const std::vector<double> &targets, double (*lossDerivative)(double target, double output));
 	void backwardPassHiddenLayer(const Layer &nextLayer);
 	void updateWeights(double learningRate, Layer &prevLayer);
 	void print();

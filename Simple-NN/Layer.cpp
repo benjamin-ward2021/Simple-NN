@@ -21,10 +21,10 @@ void Layer::forwardPass(const Layer &prevLayer) {
 	}
 }
 
-void Layer::backwardPassOutputLayer(const std::vector<double> &targets) {
+void Layer::backwardPassOutputLayer(const std::vector<double> &targets, double (*lossDerivative)(double target, double output)) {
 	// The last bias doesn't contribute to anything, so we ignore it
 	for (int i = 0; i < neurons.size() - 1; i++) {
-		neurons[i].backwardPassOutputLayer(targets[i]);
+		neurons[i].backwardPassOutputLayer(targets[i], lossDerivative);
 	}
 }
 void Layer::backwardPassHiddenLayer(const Layer &nextLayer) {
