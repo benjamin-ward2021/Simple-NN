@@ -1,6 +1,8 @@
 #include <iostream>
 #include <cassert>
 #include <vector>
+#include <random>
+#include <fstream> // TODO: clean these up
 #include "Layer.hpp"
 #include "Network.hpp"
 
@@ -41,25 +43,62 @@ void Network::backwardPass(std::vector<double> targets) {
 	}
 }
 
-void Network::updateWeights(double learningRate) {
+void Network::updateWeights(double learningRate, double momentumFactor) {
 	for (int i = 1; i < layers.size(); i++) {
-		layers[i].updateWeights(learningRate, layers[i - 1]);
+		layers[i].updateWeights(learningRate, momentumFactor, layers[i - 1]);
 	}
 }
 
-void Network::train(int epochs, double learningRate, std::vector<std::vector<double>> inputs, std::vector<std::vector<double>> targets) {
+// Uses online SGD
+void Network::train(int epochs, int randomSeed, double learningRate, double momentumFactor, std::vector<std::vector<double>> inputs, std::vector<std::vector<double>> targets) {
+	std::default_random_engine randomEngine = std::default_random_engine(randomSeed);
+	// This has both ends inclusive, so we need to subtract one to the max to get an index
+	std::uniform_int_distribution<int> randomIndexGenerator(0, inputs.size() - 1);
 	for (int i = 0; i < epochs; i++) {
+		double loss = 0.0;
 		for (int j = 0; j < inputs.size(); j++) {
-			forwardPass(inputs[j]);
-			backwardPass(targets[j]);
-			updateWeights(learningRate);
+			int randomIndex = randomIndexGenerator(randomEngine);
+			forwardPass(inputs[randomIndex]);
+			backwardPass(targets[randomIndex]);
+			loss += mse(targets[randomIndex], getOutputs());
+			updateWeights(learningRate, momentumFactor);
+		}
+
+		if (i % (epochs / 10) == 0 || i == epochs - 1) {
+			std::cout << "Loss " << i << ": " << loss / inputs.size() << std::endl;
 		}
 	}
+}
+
+void Network::createCsv(std::string filename, std::vector<std::vector<double>> inputs) {
+	std::ofstream csv;
+	csv.open(filename + ".csv");
+	csv << "x,predicted y" << std::endl;
+	for (int i = 0; i < inputs.size(); i++) {
+		forwardPass(inputs[i]);
+		std::vector<double> outputs = getOutputs();
+		// Currently we have only one input and one output dimension, so we can just get the 0th index of both
+		csv << inputs[i][0] << "," << outputs[0] << std::endl;
+	}
+
+	csv.close();
 }
 
 // Not really much of a "mean" since there's only one error being calculated
 double Network::mse(double target, double output) {
 	return pow(output - target, 2);
+}
+
+// This is for multiple samples with one input and output parameter, not one sample with multiple parameters
+double Network::mse(std::vector<double> target, std::vector<double> output) {
+	assert(target.size() == output.size());
+	double acc = 0.0;
+	for (int i = 0; i < target.size(); i++) {
+		double error = output[i] - target[i];
+		acc += error * error;
+	}
+
+	return acc / target.size();
 }
 
 double Network::mseDerivative(double target, double output) {
@@ -70,4 +109,8 @@ void Network::print() {
 	for (int i = 0; i < layers.size(); i++) {
 		layers[i].print();
 	}
+}
+
+std::vector<double> Network::getOutputs() {
+	return layers.back().getOutputs();
 }

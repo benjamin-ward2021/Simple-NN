@@ -127,12 +127,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="DataGenerator.cpp" />
     <ClCompile Include="Layer.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Network.cpp" />
     <ClCompile Include="Neuron.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="DataGenerator.hpp" />
     <ClInclude Include="Layer.hpp" />
     <ClInclude Include="Network.hpp" />
     <ClInclude Include="Neuron.hpp" />

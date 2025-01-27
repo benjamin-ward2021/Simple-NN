@@ -1,4 +1,5 @@
 #include <iostream>
+#include <vector>
 #include <random>
 #include "Neuron.hpp"
 #include "Layer.hpp"
@@ -33,9 +34,9 @@ void Layer::backwardPassHiddenLayer(const Layer &nextLayer) {
 	}
 }
 
-void Layer::updateWeights(double learningRate, Layer &prevLayer) {
+void Layer::updateWeights(double learningRate, double momentumFactor, Layer &prevLayer) {
 	for (int i = 0; i < neurons.size() - 1; i++) {
-		neurons[i].updateWeights(learningRate, prevLayer);
+		neurons[i].updateWeights(learningRate, momentumFactor, prevLayer);
 	}
 }
 
@@ -46,4 +47,15 @@ void Layer::print() {
 	}
 
 	std::cout << std::endl;
+}
+
+std::vector<double> Layer::getOutputs() {
+	std::vector<double> outputs;
+	outputs.reserve(neurons.size() - 1);
+	// Ignore bias neuron
+	for (int i = 0; i < neurons.size() - 1; i++) {
+		outputs.push_back(neurons[i].getOutput());
+	}
+
+	return outputs;
 }
